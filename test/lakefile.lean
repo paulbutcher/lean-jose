@@ -7,6 +7,8 @@ open Lake DSL
 
 require jose from ".."
 
+require wycheproof from "../vectors"
+
 require plausible from git "https://github.com/leanprover-community/plausible" @ "v4.33.0"
 
 package «jose-test» where

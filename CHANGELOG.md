@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.0
+
+- The Wycheproof vectors are a package of their own, `vectors`, which another library's suite can require.
+
 ## 0.1.1
 
 - Updated to `leancrypto` 0.4.1.

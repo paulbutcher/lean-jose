@@ -78,7 +78,7 @@ Checked against published vectors, not proved:
 - RFC 7515 A.1 and A.2 verify under the keys those appendices publish, and A.1 is reproduced from its header, its payload and its key rather than only verified.
 - RFC 7520 §4.2 verifies under the RSA key that RFC gives in §3.4, which carries no algorithm of its own.
 - RFC 7638 §3.1 and RFC 8037 §2 have the thumbprints those sections publish, and RFC 7638 §3.1 the canonical form it prints, member for member.
-- Project Wycheproof's JSON Web Signature suite, 354 of its 401 cases, and its JSON Web Key suite, 25 of 26. The 41 others in the first are its `ES*` and `EdDSA` groups; the remaining six, and the one key case, are left out with the reason recorded in the file that generates them.
+- Project Wycheproof's JSON Web Signature suite, 354 of its 401 cases, and its JSON Web Key suite, 25 of 26. The 41 others in the first are its `ES*` groups, which this backend cannot perform and the suite skips; the remaining six, and the one key case, are left out of the vectors themselves, with the reason recorded there.
 
 Checked against constructed inputs:
 
@@ -96,3 +96,9 @@ Checked over drawn values, not proved:
 ## Building
 
 `lake build` builds the library; `lake test` runs the suite, which lives in a subproject of its own so that nothing it needs reaches a downstream consumer. The properties above are run with [Plausible](https://github.com/leanprover-community/plausible), which that subproject requires and a consumer of this library does not.
+
+The Wycheproof vectors are a package of their own, `vectors`, which requires nothing at all, so another JOSE library's suite can run the same cases:
+
+```lean
+require wycheproof from git "https://github.com/paulbutcher/lean-jose" / "vectors"
+```

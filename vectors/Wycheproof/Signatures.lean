@@ -6,42 +6,33 @@ module
 
 /-!
 Project Wycheproof's JSON Web Signature vectors, from `json_web_signature_test.json`
-in `testvectors_v1`. Generated from that file rather than transcribed;
-`Tests.Wycheproof` runs them.
+in `testvectors_v1`. Generated from that file rather than transcribed.
 
-354 of the suite's cases are here. The rest are its groups for algorithms
-this backend cannot perform, every one of which would be refused for that reason
-rather than for the reason the case was written to test:
-  es256 (ES256)
-  rfc7520 (ES521)
-  rfc7520WithKeyOps (ES521)
-  SpecialCaseEs256 (ES256)
+395 of the suite's 401 cases are here, and every group is, whatever algorithm it names.
+A suite skips the groups its own backend cannot perform, so that a case is refused
+by the check it was written to exercise and never by the algorithm.
 
-Four more are left out because no library can meet their stated results at once.
+Four cases are left out because no library can meet their stated results at once.
 372's token is 367's with one character inserted into the header, and the two carry
 the same tag; anything that accepts 372 has to ignore that character and check that
 tag over the bytes that remain, which are 367's, so it accepts 367 as well. 367 is
 marked invalid and 372 valid. 370 and 373 are the same pair with the character in
 the payload instead. The tag all four carry is the HMAC of 367's signing input under
 the group's key, which OpenSSL confirms, so the token 367 and 370 print is the
-group's untampered one and is sound. This library accepts 367 and 370 and refuses
-372 and 373.
+group's untampered one and is sound.
 
 Two more, 346 and 350, are left out because the key they are checked against carries
 an `alg` that RFC 7520 does not put on it. That RFC gives the key in §3.4 with
 `kty`, `kid`, `use` and its components and no algorithm at all; the copy here adds
 PS256, while the token is the PS384 of §4.2. The added label is generated rather
 than published, as the group beside it shows by declaring `ES521`, which is not an
-algorithm any RFC names. This library uses a key only for the algorithm it declares,
-which is what RFC 7517 §4.4 says that member is for and what the `ps512` group of
-this same suite requires. `Tests.Verify` checks that same token against the key as
-RFC 7520 publishes it, where it verifies, and against one declaring PS256, where it
-does not.
+algorithm any RFC names. RFC 7517 §4.4 says that member is what a key may be used
+for, and the `ps512` group of this same suite requires it to be read that way.
 -/
 
 public section
 
-namespace Tests.Wycheproof
+namespace Wycheproof.Signatures
 
 structure Case where
   id : Nat
@@ -103,6 +94,54 @@ def groups : List Group := [
           "{\"payload\":\"Zm9v\",\"signatures\":[{\"protected\":\"eyJhbGciOiJIUzI1NiIsImtpZ" ++
             "CI6ImtpZC1hZXMtc2lnbiJ9\",\"header\":{\"unknown\":\"untrustworthy\"},\"signature" ++
             "\":\"TD37p4c_0jmreSrBSDmE0F3mYSPtkZ3WrSyI5wb_KTg\"}" }] },
+  { comment := "es256", alg := "ES256",
+    key := "{\"alg\":\"ES256\",\"crv\":\"P-256\",\"kid\":\"kid-ec-sign\",\"kty\":\"EC\",\"us" ++
+      "e\":\"sig\",\"x\":\"04N0xi21hshyvBp7I167sbE_bXqyqkAPfefdklMO7wY\",\"y\":\"UI8exy" ++
+      "-C06a7DUnjIdENkxeFtHM4-l_41LqEw9nVgmw\"}",
+    cases := [
+      { id := 18, valid := true, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v.5cA0OHyMP7ezamUd5c9kV-FrGxd" ++
+            "x4hbGXOdplQkutrqWrte5P-pAvsE3Ve6xSyU3YDQwUHjVVOtvcrEbbnZ8yA" },
+      { id := 19, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v.XcA0OHyMP7ezamUd5c9kV-FrGxd" ++
+            "x4hbGXOdplQkutrqWrte5P-pAvsE3Ve6xSyU3YDQwUHjVVOtvcrEbbnZ8yA" },
+      { id := 20, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v." },
+      { id := 21, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v" },
+      { id := 22, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.WG9v.5cA0OHyMP7ezamUd5c9kV-FrGxd" ++
+            "x4hbGXOdplQkutrqWrte5P-pAvsE3Ve6xSyU3YDQwUHjVVOtvcrEbbnZ8yA" },
+      { id := 23, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0..5cA0OHyMP7ezamUd5c9kV-FrGxdx4hb" ++
+            "GXOdplQkutrqWrte5P-pAvsE3Ve6xSyU3YDQwUHjVVOtvcrEbbnZ8yA" },
+      { id := 24, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.5cA0OHyMP7ezamUd5c9kV-FrGxdx4hbG" ++
+            "XOdplQkutrqWrte5P-pAvsE3Ve6xSyU3YDQwUHjVVOtvcrEbbnZ8yA" },
+      { id := 25, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6IlhpZC1lYy1zaWduIn0.Zm9v.5cA0OHyMP7ezamUd5c9kV-FrGxd" ++
+            "x4hbGXOdplQkutrqWrte5P-pAvsE3Ve6xSyU3YDQwUHjVVOtvcrEbbnZ8yA" },
+      { id := 26, valid := false, jws :=
+          ".Zm9v.5cA0OHyMP7ezamUd5c9kV-FrGxdx4hbGXOdplQkutrqWrte5P-pAvsE3Ve6xSyU3YDQwUHjVVO" ++
+            "tvcrEbbnZ8yA" },
+      { id := 27, valid := false, jws :=
+          "Zm9v.5cA0OHyMP7ezamUd5c9kV-FrGxdx4hbGXOdplQkutrqWrte5P-pAvsE3Ve6xSyU3YDQwUHjVVOt" ++
+            "vcrEbbnZ8yA" },
+      { id := 28, valid := false, jws :=
+          ".Zm9v." },
+      { id := 29, valid := false, jws :=
+          "Zm9v" },
+      { id := 30, valid := false, jws :=
+          "" },
+      { id := 31, valid := false, jws :=
+          "eyJhbGciOiJIUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v.TgWtz2FIRukBQ_mA5sgHa0Ybtgn" ++
+            "7bl-YBPAi7Z0XdHU" },
+      { id := 32, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIiwiandrIjp7Imt0eSI6IkVDIiwia2lkIjoi" ++
+            "a2lkLWVjLXNpZ24iLCJ1c2UiOiJzaWciLCJhbGciOiJFUzI1NiIsIngiOiJNZG5UWkRJaERKYmZBU2RG" ++
+            "cWFtY3BPMkNoOUdOS0sybTBNUWxoNDAyU3BvIiwieSI6Ijdhdko0bHFfV3l4LW5MUERCUTJZcHl0dUh5" ++
+            "TWlvMDdCVXl2bDNqYUMtMVkiLCJjcnYiOiJQLTI1NiJ9fQ.Zm9v.4jmsollQD8ZxvySzXYnIEYA4fwaZ" ++
+            "i2ZbC0aI1J4LYmW2Bn31NhKdjms2N6o51Dff5-InWXQF9m45VtTexl6yjg" }] },
   { comment := "rs256", alg := "RS256",
     key := "{\"alg\":\"RS256\",\"e\":\"AQAB\",\"kid\":\"kid-rsa-sign\",\"kty\":\"RSA\",\"n\"" ++
       ":\"kqGboBfAWttWPCA-0cGRgsY6SaYoIARt0B_PkaEcIq9HPYNdu9n6UuWHuuTHrjF_ZoQW97r5HaAor" ++
@@ -2033,6 +2072,19 @@ def groups : List Group := [
       "_qixoR7jig3__kRhuaxwUkRz5iaiQkqgc5gHdrNP5zw\",\"use\":\"sig\"}",
     cases := [
 ] },
+  { comment := "rfc7520", alg := "ES521",
+    key := "{\"alg\":\"ES521\",\"crv\":\"P-521\",\"kid\":\"bilbo.baggins@hobbiton.example\"," ++
+      "\"kty\":\"EC\",\"use\":\"sig\",\"x\":\"AHKZLLOsCOzz5cY97ewNUajB957y-C-U88c3v13nm" ++
+      "GZx6sYl_oJXu9A5RkTKqjqvjyekWF-7ytDyRXYgCF5cj0Kt\",\"y\":\"AdymlHvOiLxXkEhayXQnNC" ++
+      "vDX4h9htZaCJN34kfmC6pV5OhQHiraVySsUdaQkAgDPrwQrJmbnX9cwlGfP-HqHZR1\"}",
+    cases := [
+      { id := 347, valid := true, jws :=
+          "eyJhbGciOiJFUzUxMiIsImtpZCI6ImJpbGJvLmJhZ2dpbnNAaG9iYml0b24uZXhhbXBsZSJ9.SXTigJl" ++
+            "zIGEgZGFuZ2Vyb3VzIGJ1c2luZXNzLCBGcm9kbywgZ29pbmcgb3V0IHlvdXIgZG9vci4gWW91IHN0ZXA" ++
+            "gb250byB0aGUgcm9hZCwgYW5kIGlmIHlvdSBkb24ndCBrZWVwIHlvdXIgZmVldCwgdGhlcmXigJlzIG5" ++
+            "vIGtub3dpbmcgd2hlcmUgeW91IG1pZ2h0IGJlIHN3ZXB0IG9mZiB0by4.AE_R_YZCChjn4791jSQCrdP" ++
+            "ZCNYqHXCTZH0-JZGYNlaAjP2kqaluUIIUnC9qvbu9Plon7KRTzoNEuT4Va2cmL1eJAQy3mtPBu_u_sDD" ++
+            "yYjnAMDxXPn7XrT0lw-kvAD890jl8e2puQens_IEKBpHABlsbEPX6sFY8OcGDqoRuBomu9xQ2" }] },
   { comment := "rfc7520", alg := "HS256",
     key := "{\"alg\":\"HS256\",\"k\":\"hJtXIZ2uSN5kbQfbtTNWbpdmhkV8FJG-Onbc6mxCcYg\",\"kid\"" ++
       ":\"018c0ae5-4d9b-471b-bfd6-eef314bc7037\",\"kty\":\"oct\",\"use\":\"sig\"}",
@@ -2069,6 +2121,19 @@ def groups : List Group := [
       "KwuCLqKnS2BYwdq_mzSnbLY7h_qixoR7jig3__kRhuaxwUkRz5iaiQkqgc5gHdrNP5zw\"}",
     cases := [
 ] },
+  { comment := "rfc7520WithKeyOps", alg := "ES521",
+    key := "{\"alg\":\"ES521\",\"crv\":\"P-521\",\"key_ops\":[\"verify\"],\"kid\":\"bilbo.ba" ++
+      "ggins@hobbiton.example\",\"kty\":\"EC\",\"x\":\"AHKZLLOsCOzz5cY97ewNUajB957y-C-U" ++
+      "88c3v13nmGZx6sYl_oJXu9A5RkTKqjqvjyekWF-7ytDyRXYgCF5cj0Kt\",\"y\":\"AdymlHvOiLxXk" ++
+      "EhayXQnNCvDX4h9htZaCJN34kfmC6pV5OhQHiraVySsUdaQkAgDPrwQrJmbnX9cwlGfP-HqHZR1\"}",
+    cases := [
+      { id := 351, valid := true, jws :=
+          "eyJhbGciOiJFUzUxMiIsImtpZCI6ImJpbGJvLmJhZ2dpbnNAaG9iYml0b24uZXhhbXBsZSJ9.SXTigJl" ++
+            "zIGEgZGFuZ2Vyb3VzIGJ1c2luZXNzLCBGcm9kbywgZ29pbmcgb3V0IHlvdXIgZG9vci4gWW91IHN0ZXA" ++
+            "gb250byB0aGUgcm9hZCwgYW5kIGlmIHlvdSBkb24ndCBrZWVwIHlvdXIgZmVldCwgdGhlcmXigJlzIG5" ++
+            "vIGtub3dpbmcgd2hlcmUgeW91IG1pZ2h0IGJlIHN3ZXB0IG9mZiB0by4.AE_R_YZCChjn4791jSQCrdP" ++
+            "ZCNYqHXCTZH0-JZGYNlaAjP2kqaluUIIUnC9qvbu9Plon7KRTzoNEuT4Va2cmL1eJAQy3mtPBu_u_sDD" ++
+            "yYjnAMDxXPn7XrT0lw-kvAD890jl8e2puQens_IEKBpHABlsbEPX6sFY8OcGDqoRuBomu9xQ2" }] },
   { comment := "rfc7520", alg := "HS256",
     key := "{\"alg\":\"HS256\",\"k\":\"hJtXIZ2uSN5kbQfbtTNWbpdmhkV8FJG-Onbc6mxCcYg\",\"kid\"" ++
       ":\"018c0ae5-4d9b-471b-bfd6-eef314bc7037\",\"kty\":\"oct\",\"use\":\"sig\"}",
@@ -2177,6 +2242,91 @@ def groups : List Group := [
             "ZKkmNFBJlFP8M9VGzCyil9S1c" },
       { id := 377, valid := true, jws :=
           "eyJraWQiOiJoczI1Ni1rZXkiLAoJImFsZyI6IkhTMjU2In0.VGVzdA.Yxn8cTl7IHpFIoEPOFrWmjm-G" ++
-            "Qlr_RMqHNJOp1ZuweY" }] }]
+            "Qlr_RMqHNJOp1ZuweY" }] },
+  { comment := "SpecialCaseEs256", alg := "ES256",
+    key := "{\"alg\":\"ES256\",\"crv\":\"P-256\",\"kid\":\"kid-ec-sign\",\"kty\":\"EC\",\"us" ++
+      "e\":\"sig\",\"x\":\"04N0xi21hshyvBp7I167sbE_bXqyqkAPfefdklMO7wY\",\"y\":\"UI8exy" ++
+      "-C06a7DUnjIdENkxeFtHM4-l_41LqEw9nVgmw\"}",
+    cases := [
+      { id := 378, valid := true, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v.5cA0OHyMP7ezamUd5c9kV-FrGxd" ++
+            "x4hbGXOdplQkutrppUShFwBW_Qj7IqhFOtNrIXLLKXS5CSZmERxmnjeyoiQ" },
+      { id := 379, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v.AOXANDh8jD-3s2plHeXPZFfhaxs" ++
+            "XceIWxlznaZUJLra6AJau17k_6kC-wTdV7rFLJTdgNDBQeNVU629ysRtudnzI" },
+      { id := 380, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v.5cA0OHyMP7ezamUd5c9kV-FrGxd" ++
+            "x4hbGXOdplQkutroAlq7XuT_qQL7BN1XusUslN2A0MFB41VTrb3KxG252fMgA" },
+      { id := 381, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v.AeXANDd8jD-4s2plHeXPZFeeUhX" ++
+            "FGPm1S1ChNFgFkdwLAJau17k_6kC-wTdV7rFLJTdgNDBQeNVU629ysRtudnzI" },
+      { id := 382, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v.AOXANDh8jD-3s2plHeXPZFfhaxs" ++
+            "XceIWxlznaZUJLra6AZau17g_6kC_wTdV7rFLJTcdGyr-H-zzcGMse95q2aIZ" },
+      { id := 383, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v.AeXANDh8jD-3s2plHeXPZFfhaxs" ++
+            "XceIWxlznaZUJLra6AJau17k_6kC-wTdV7rFLJTdgNDBQeNVU629ysRtudnzI" },
+      { id := 384, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v.AOXANDh8jD-3s2plHeXPZFfhaxs" ++
+            "XceIWxlznaZUJLra6AZau17k_6kC-wTdV7rFLJTdgNDBQeNVU629ysRtudnzI" },
+      { id := 385, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v.AAAAAAAAAAAAAAAAAAAAAAAAAAA" ++
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" ++
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" ++
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" ++
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA5cA0OHyMP7ezamUd5c9kV-FrGxdx4hbGXOdplQkutroAAAA" ++
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" ++
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" ++
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" ++
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACWrte5P-pAvsE3Ve6xSyU3YDQ" ++
+            "wUHjVVOtvcrEbbnZ8yA" },
+      { id := 386, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v.AAAAAAAAAAAAAAAAAAAAAAAAAAA" ++
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+      { id := 387, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v.AAAAAAAAAAAAAAAAAAAAAAAAAAA" ++
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQ" },
+      { id := 388, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v.AAAAAAAAAAAAAAAAAAAAAAAAAAA" ++
+            "AAAAAAAAAAAAAAAD_____AAAAAP__________vOb6racXnoTzucrC_GMlUA" },
+      { id := 389, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v.AAAAAAAAAAAAAAAAAAAAAAAAAAA" ++
+            "AAAAAAAAAAAAAAAD_____AAAAAP__________vOb6racXnoTzucrC_GMlUQ" },
+      { id := 390, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v.AAAAAAAAAAAAAAAAAAAAAAAAAAA" ++
+            "AAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+      { id := 391, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v.AAAAAAAAAAAAAAAAAAAAAAAAAAA" ++
+            "AAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQ" },
+      { id := 392, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v.AAAAAAAAAAAAAAAAAAAAAAAAAAA" ++
+            "AAAAAAAAAAAAAAAH_____AAAAAP__________vOb6racXnoTzucrC_GMlUA" },
+      { id := 393, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v.AAAAAAAAAAAAAAAAAAAAAAAAAAA" ++
+            "AAAAAAAAAAAAAAAH_____AAAAAP__________vOb6racXnoTzucrC_GMlUQ" },
+      { id := 394, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v._____wAAAAD__________7zm-q2" ++
+            "nF56E87nKwvxjJVAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+      { id := 395, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v._____wAAAAD__________7zm-q2" ++
+            "nF56E87nKwvxjJVAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQ" },
+      { id := 396, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v._____wAAAAD__________7zm-q2" ++
+            "nF56E87nKwvxjJVD_____AAAAAP__________vOb6racXnoTzucrC_GMlUA" },
+      { id := 397, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v._____wAAAAD__________7zm-q2" ++
+            "nF56E87nKwvxjJVD_____AAAAAP__________vOb6racXnoTzucrC_GMlUQ" },
+      { id := 398, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v._____wAAAAD__________7zm-q2" ++
+            "nF56E87nKwvxjJVEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+      { id := 399, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v._____wAAAAD__________7zm-q2" ++
+            "nF56E87nKwvxjJVEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQ" },
+      { id := 400, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v._____wAAAAD__________7zm-q2" ++
+            "nF56E87nKwvxjJVH_____AAAAAP__________vOb6racXnoTzucrC_GMlUA" },
+      { id := 401, valid := false, jws :=
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v._____wAAAAD__________7zm-q2" ++
+            "nF56E87nKwvxjJVH_____AAAAAP__________vOb6racXnoTzucrC_GMlUQ" }] }]
 
-end Tests.Wycheproof
+end Wycheproof.Signatures

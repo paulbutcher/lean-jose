@@ -5,11 +5,11 @@ Released under Apache 2.0 license as described in the file LICENSE.
 module
 
 import Jose.Pure
-import Tests.WycheproofKeyVectors
+import Wycheproof.Keys
 
 /-!
 Project Wycheproof's JSON Web Key suite, run against this backend. The vectors are in
-`Tests.WycheproofKeyVectors`, generated from the suite's own JSON.
+`Wycheproof.Keys`, a package of their own, generated from the suite's own JSON.
 
 Each case is a key set and a token, and what it asks is whether reading that set and checking that
 token should succeed. A set this library refuses outright and one it reads but finds no usable key
@@ -17,7 +17,7 @@ in are the same answer here, which is what the suite is asking about.
 -/
 
 namespace Tests.WycheproofKeys
-open Jose
+open Jose Wycheproof.Keys
 
 private def algs : Array Alg :=
   #[.hs256, .hs384, .hs512, .rs256, .rs384, .rs512, .ps256, .ps384, .ps512]

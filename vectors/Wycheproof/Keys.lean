@@ -6,19 +6,18 @@ module
 
 /-!
 Project Wycheproof's JSON Web Key vectors, from `json_web_key_test.json` in
-`testvectors_v1`. Generated from that file rather than transcribed;
-`Tests.WycheproofKeys` runs them. Each case is a key set and a token, and what it
-says is whether the set should be read and the token accepted.
+`testvectors_v1`. Generated from that file rather than transcribed. Each case is a
+key set and a token, and what it says is whether the set should be read and the
+token accepted.
 
-25 of the suite's 26 cases are here. The one left out is 7, which asks
-for a modulus with the ROCA weakness to be refused; recognising one is a fingerprint
-test on the key rather than anything JOSE defines, and belongs wherever keys are
-admitted.
+25 of the suite's 26 cases are here. The one left out is 7, which asks for a modulus with
+the ROCA weakness to be refused; recognising one is a fingerprint test on the key
+rather than anything JOSE defines, and belongs wherever keys are admitted.
 -/
 
 public section
 
-namespace Tests.WycheproofKeys
+namespace Wycheproof.Keys
 
 structure Case where
   id : Nat
@@ -245,4 +244,4 @@ def groups : List Group := [
           "eyJhbGciOiJIUzI1NiIsImtpZCI6ImtpZC1hZXMtc2lnbiJ9.Zm9v.TD37p4c_0jmreSrBSDmE0F3mYS" ++
             "PtkZ3WrSyI5wb_KTg" }] }]
 
-end Tests.WycheproofKeys
+end Wycheproof.Keys

@@ -5,18 +5,19 @@ Released under Apache 2.0 license as described in the file LICENSE.
 module
 
 import Jose.Pure
-import Tests.WycheproofVectors
+import Wycheproof.Signatures
 
 /-!
 Project Wycheproof's JSON Web Signature suite, run against this backend. The vectors are in
-`Tests.WycheproofVectors`, generated from the suite's own JSON rather than copied out of it.
+`Wycheproof.Signatures`, a package of their own, generated from the suite's own JSON rather than
+copied out of it.
 
 Each case says whether a library should accept the token; what is checked is that this one agrees,
 so a case is a failure both when a forgery is accepted and when a sound token is refused.
 -/
 
 namespace Tests.Wycheproof
-open Jose
+open Jose Wycheproof.Signatures
 
 /-- Every algorithm this backend performs. The suite's cases are about verification rather than
 about policy, so the policy is as wide as the backend; a case is then refused by the check it was
@@ -27,6 +28,15 @@ private def algs : Array Alg :=
 private def policy : Policy :=
   (Policy.mk? algs "joe" #["everyone"]).getD
     { algs := #[.hs256], issuer := "joe", audience := #["everyone"] }
+
+/-- Groups this backend has an answer for. The vectors carry every group the suite publishes, so a
+group naming something `Alg.ofString` does not read, or an algorithm this backend cannot perform, is
+dropped here: every case in it would be refused for that rather than for what it was written to
+test. -/
+private def answerable (group : Group) : Bool :=
+  match Alg.ofString group.alg with
+  | none => false
+  | some alg => algs.contains alg
 
 /-- A key the suite publishes for encryption, or one this library will not read, leaves the set
 empty rather than failing it, and every token then has no key to be checked against. That is the
@@ -42,6 +52,6 @@ private def run (group : Group) : List (String × Bool) :=
     (s!"wycheproof {group.comment} {group.alg} {vector.id}",
       (Pure.verify policy keys vector.jws).isOk == vector.valid)
 
-public def checks : List (String × Bool) := groups.flatMap run
+public def checks : List (String × Bool) := (groups.filter answerable).flatMap run
 
 end Tests.Wycheproof
