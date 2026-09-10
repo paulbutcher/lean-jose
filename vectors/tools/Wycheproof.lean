@@ -83,6 +83,36 @@ def field (value : Json) (name : String) : String :=
 
 def tests (group : Json) : Array Json := (group.getObjValAs? (Array Json) "tests").toOption.getD #[]
 
+/-- A member no case can be written without. Every case in the published files carries these, so an
+absent one means the input is not the file this reads; that is worth stopping for, where standing a
+placeholder in for it would write a case that tests something nobody chose. -/
+def required (test : Json) (id : Nat) (name : String) : IO String :=
+  match (test.getObjValAs? String name).toOption with
+  | some text => return text
+  | none => throw (.userError ("case " ++ toString id ++ " has no " ++ name))
+
+def caseId (group test : Json) : IO Nat :=
+  match (test.getObjValAs? Nat "tcId").toOption with
+  | some id => return id
+  | none => throw (.userError ("a case in group " ++ field group "comment" ++ " has no tcId"))
+
+/-- What the case says a library should answer. Wycheproof writes `acceptable` elsewhere in its
+corpus, and this stops on it rather than reading it as `invalid`, so that a file which starts using
+it is read by somebody instead of quietly becoming a suite of refusals. -/
+def expected (test : Json) (id : Nat) : IO Bool := do
+  match ← required test id "result" with
+  | "valid" => return true
+  | "invalid" => return false
+  | other => throw (.userError ("case " ++ toString id ++ " has an unexpected result: " ++ other))
+
+/-- The `alg` a key declares, written as the `Option` the vectors carry. A key declaring none is
+`none` rather than a placeholder, so that a suite skipping the algorithms it cannot perform can tell
+that from a name it could not read. -/
+def declaredAlg (key : Json) : String :=
+  match (key.getObjValAs? String "alg").toOption with
+  | none => "none"
+  | some alg => "some " ++ q ++ alg ++ q
+
 def keyOf (group : Json) : Json :=
   (group.getObjVal? "public").toOption.getD ((group.getObjVal? "private").toOption.getD Json.null)
 
@@ -98,7 +128,7 @@ def disagreements : List Nat := [346, 350]
 /-- The key case that asks for a ROCA-vulnerable modulus to be recognised. -/
 def excludedKeys : List Nat := [7]
 
-def signatures (json : Json) : String := Id.run do
+def signatures (json : Json) : IO String := do
   let mut emitted : Array String := #[]
   let mut kept := 0
   let mut total := 0
@@ -107,16 +137,16 @@ def signatures (json : Json) : String := Id.run do
     let mut cases : Array String := #[]
     for test in tests group do
       total := total + 1
-      let id := (test.getObjValAs? Nat "tcId").toOption.getD 0
+      let id ← caseId group test
       if contradictory.contains id || disagreements.contains id then continue
-      cases := cases.push (caseLiteral id (field test "result" == "valid") (field test "jws"))
+      cases := cases.push (caseLiteral id (← expected test id) (← required test id "jws"))
       kept := kept + 1
     emitted := emitted.push ("  { comment := " ++ q ++ field group "comment" ++ q ++ ", alg := " ++
-      q ++ field key "alg" ++ q ++ ",\n    key := " ++ literal "      " key.compress ++
+      declaredAlg key ++ ",\n    key := " ++ literal "      " key.compress ++
       ",\n    cases := [\n" ++ String.intercalate ",\n" cases.toList ++ "] }")
   let census := toString kept ++ " of the suite's " ++ toString total ++
     " cases are here, and every group is, whatever algorithm it names."
-  preamble "Wycheproof.Signatures"
+  return preamble "Wycheproof.Signatures"
     [ "Project Wycheproof's JSON Web Signature vectors, from `json_web_signature_test.json`",
       "in `testvectors_v1`. Generated from that file rather than transcribed.",
       "",
@@ -140,10 +170,14 @@ def signatures (json : Json) : String := Id.run do
       "than published, as the group beside it shows by declaring `ES521`, which is not an",
       "algorithm any RFC names. RFC 7517 §4.4 says that member is what a key may be used",
       "for, and the `ps512` group of this same suite requires it to be read that way." ]
-    [ "  comment : String", "  alg : String", "  key : String" ] ++ "\n" ++
+    [ "  comment : String",
+      "  /-- `none` where the key declares no algorithm, which is not the same as one this",
+      "  reader cannot name: a suite skipping what it cannot perform keeps these groups. -/",
+      "  alg : Option String",
+      "  key : String" ] ++ "\n" ++
     String.intercalate ",\n" emitted.toList ++ "]\n\nend Wycheproof.Signatures\n"
 
-def keys (json : Json) : String := Id.run do
+def keys (json : Json) : IO String := do
   let mut emitted : Array String := #[]
   let mut kept := 0
   let mut total := 0
@@ -151,9 +185,9 @@ def keys (json : Json) : String := Id.run do
     let mut cases : Array String := #[]
     for test in tests group do
       total := total + 1
-      let id := (test.getObjValAs? Nat "tcId").toOption.getD 0
+      let id ← caseId group test
       if excludedKeys.contains id then continue
-      cases := cases.push (caseLiteral id (field test "result" == "valid") (field test "jws"))
+      cases := cases.push (caseLiteral id (← expected test id) (← required test id "jws"))
       kept := kept + 1
     if !cases.isEmpty then
       emitted := emitted.push ("  { comment := " ++ q ++ field group "comment" ++ q ++
@@ -161,7 +195,7 @@ def keys (json : Json) : String := Id.run do
         ",\n    cases := [\n" ++ String.intercalate ",\n" cases.toList ++ "] }")
   let census := toString kept ++ " of the suite's " ++ toString total ++
     " cases are here. The one left out is 7, which asks for a modulus with"
-  preamble "Wycheproof.Keys"
+  return preamble "Wycheproof.Keys"
     [ "Project Wycheproof's JSON Web Key vectors, from `json_web_key_test.json` in",
       "`testvectors_v1`. Generated from that file rather than transcribed. Each case is a",
       "key set and a token, and what it says is whether the set should be read and the",
@@ -179,9 +213,9 @@ def main (args : List String) : IO UInt32 := do
     let read (name : String) : IO Json := do
       IO.ofExcept (Json.parse (← IO.FS.readFile (System.FilePath.mk directory / name)))
     IO.FS.writeFile "Wycheproof/Signatures.lean"
-      (signatures (← read "json_web_signature_test.json"))
+      (← signatures (← read "json_web_signature_test.json"))
     IO.FS.writeFile "Wycheproof/Keys.lean"
-      (keys (← read "json_web_key_test.json"))
+      (← keys (← read "json_web_key_test.json"))
     IO.println "wrote Wycheproof/Signatures.lean and Wycheproof/Keys.lean"
     return 0
   | _ =>

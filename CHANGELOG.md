@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1
+
+- The Wycheproof vectors carry a key's `alg` as an `Option`, so the four groups whose key declares none are run again rather than skipped.
+- The vector generator stops on a case member it cannot read, rather than standing a placeholder in for it.
+
 ## 0.2.0
 
 - The Wycheproof vectors are a package of their own, `vectors`, which another library's suite can require.

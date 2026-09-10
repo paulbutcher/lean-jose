@@ -29,14 +29,17 @@ private def policy : Policy :=
   (Policy.mk? algs "joe" #["everyone"]).getD
     { algs := #[.hs256], issuer := "joe", audience := #["everyone"] }
 
-/-- Groups this backend has an answer for. The vectors carry every group the suite publishes, so a
-group naming something `Alg.ofString` does not read, or an algorithm this backend cannot perform, is
-dropped here: every case in it would be refused for that rather than for what it was written to
-test. -/
+/-- Groups this backend has an answer for. The vectors carry every group the suite publishes, so one
+whose key names something `Alg.ofString` does not read, or an algorithm this backend cannot perform,
+is dropped here: every case in it would be refused for that rather than for what it was written to
+test. A key naming no algorithm is kept, because what those groups test is the key itself. -/
 private def answerable (group : Group) : Bool :=
-  match Alg.ofString group.alg with
-  | none => false
-  | some alg => algs.contains alg
+  match group.alg with
+  | none => true
+  | some name =>
+    match Alg.ofString name with
+    | none => false
+    | some alg => algs.contains alg
 
 /-- A key the suite publishes for encryption, or one this library will not read, leaves the set
 empty rather than failing it, and every token then has no key to be checked against. That is the
@@ -48,8 +51,9 @@ private def keysOf (group : Group) : KeySet Backend.pure :=
 
 private def run (group : Group) : List (String × Bool) :=
   let keys := keysOf group
+  let alg := group.alg.getD "no alg"
   group.cases.map fun vector =>
-    (s!"wycheproof {group.comment} {group.alg} {vector.id}",
+    (s!"wycheproof {group.comment} {alg} {vector.id}",
       (Pure.verify policy keys vector.jws).isOk == vector.valid)
 
 public def checks : List (String × Bool) := (groups.filter answerable).flatMap run

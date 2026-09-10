@@ -41,12 +41,14 @@ structure Case where
 
 structure Group where
   comment : String
-  alg : String
+  /-- `none` where the key declares no algorithm, which is not the same as one this
+  reader cannot name: a suite skipping what it cannot perform keeps these groups. -/
+  alg : Option String
   key : String
   cases : List Case
 
 def groups : List Group := [
-  { comment := "hs256", alg := "HS256",
+  { comment := "hs256", alg := some "HS256",
     key := "{\"alg\":\"HS256\",\"k\":\"-ebuDNsVZ2iJtoZ-akfXTSCt4UO2cruLCsbWlBinggE\",\"kid\"" ++
       ":\"kid-aes-sign\",\"kty\":\"oct\",\"use\":\"sig\"}",
     cases := [
@@ -94,7 +96,7 @@ def groups : List Group := [
           "{\"payload\":\"Zm9v\",\"signatures\":[{\"protected\":\"eyJhbGciOiJIUzI1NiIsImtpZ" ++
             "CI6ImtpZC1hZXMtc2lnbiJ9\",\"header\":{\"unknown\":\"untrustworthy\"},\"signature" ++
             "\":\"TD37p4c_0jmreSrBSDmE0F3mYSPtkZ3WrSyI5wb_KTg\"}" }] },
-  { comment := "es256", alg := "ES256",
+  { comment := "es256", alg := some "ES256",
     key := "{\"alg\":\"ES256\",\"crv\":\"P-256\",\"kid\":\"kid-ec-sign\",\"kty\":\"EC\",\"us" ++
       "e\":\"sig\",\"x\":\"04N0xi21hshyvBp7I167sbE_bXqyqkAPfefdklMO7wY\",\"y\":\"UI8exy" ++
       "-C06a7DUnjIdENkxeFtHM4-l_41LqEw9nVgmw\"}",
@@ -142,7 +144,7 @@ def groups : List Group := [
             "cWFtY3BPMkNoOUdOS0sybTBNUWxoNDAyU3BvIiwieSI6Ijdhdko0bHFfV3l4LW5MUERCUTJZcHl0dUh5" ++
             "TWlvMDdCVXl2bDNqYUMtMVkiLCJjcnYiOiJQLTI1NiJ9fQ.Zm9v.4jmsollQD8ZxvySzXYnIEYA4fwaZ" ++
             "i2ZbC0aI1J4LYmW2Bn31NhKdjms2N6o51Dff5-InWXQF9m45VtTexl6yjg" }] },
-  { comment := "rs256", alg := "RS256",
+  { comment := "rs256", alg := some "RS256",
     key := "{\"alg\":\"RS256\",\"e\":\"AQAB\",\"kid\":\"kid-rsa-sign\",\"kty\":\"RSA\",\"n\"" ++
       ":\"kqGboBfAWttWPCA-0cGRgsY6SaYoIARt0B_PkaEcIq9HPYNdu9n6UuWHuuTHrjF_ZoQW97r5HaAor" ++
       "NvrMEGTGdxCHZdEtkHvNVVmrtxTBLiQCbCozXhFoIrVcr3qUBrdGnNn_M3jJi7Wg7p_-x62nS5gNG875" ++
@@ -1486,7 +1488,7 @@ def groups : List Group := [
             "e_1wt7iwxyhcyViv1el9_u0VTY609Xwp6piNknisvPXatY7Ua8XileILxBnA-gMsBUgJOFvoKPi8h8CB" ++
             "kJ3Y0868I97dWDzW_bVImVOol6sJUyQAo8uEZIPcV0pqCli_m0MWC2KrWr61_ay3isCAS77AvNTHrDYw" ++
             "U74YCsGXtTOZZcoo2C7D5S6Xnq-f7BQTmWUqLbjFwy8kw82JTH43gXAwmIRAT33XX3u1nzywbL0Q" }] },
-  { comment := "rs256", alg := "RS256",
+  { comment := "rs256", alg := some "RS256",
     key := "{\"alg\":\"RS256\",\"e\":\"AQAB\",\"kid\":\"RS256_2048\",\"kty\":\"RSA\",\"n\":" ++
       "\"orRRoH0KpfluRVZxUTVQUUqKW0YuvvcXCU-h_ugiJOY3-XRtP3yv0xh42AMltu9aFwD2WQO0aUKeid" ++
       "bqyIRQl7WrOTGJ25JRLtincRoSU_rNIPecFegkfz0-QuRuSMmOJUov6XZTE6A-_48X4aApOXofomqNzi" ++
@@ -1526,7 +1528,7 @@ def groups : List Group := [
             "RgAJij8RrzV9RDfcyG5Tp_pgVPPwz-amVRzs48M_hL_r9bP4-J8VLoHbFX5DInauTqaWDfm2etl9c44W" ++
             "__97bADJgFbnog9BbV6xXFOmIkjWCC1jrNAJ-19VHFawv2qg6pqhYLBOnH5DCpQQuLLYnQFQweCSMHz6" ++
             "apqHsDT7DzhfuY6D2LT7WL_BMsl4utC_w" }] },
-  { comment := "rs384", alg := "RS384",
+  { comment := "rs384", alg := some "RS384",
     key := "{\"alg\":\"RS384\",\"e\":\"AQAB\",\"kid\":\"RS384_2048\",\"kty\":\"RSA\",\"n\":" ++
       "\"zab6XKdr_gSS7Ffgo7__cnLcjR4lrR-zOKoFDwLBBOYxM9a1t8SYXruumsA2pbnAMHTWCuyOJbrzkq" ++
       "DEMP8FuI6UiAXT3XRRHYiFJQp7V0IVraAVxVkHZobiU8zJbAgVsSke54fMM2O0932TDrmY18WCskzqnO" ++
@@ -1560,7 +1562,7 @@ def groups : List Group := [
             "PobBqJ10GAkJMd94wpGn7DPAI_nWVImVPpZvSRBgv07wYnsC3GzD74Di0TiR91SWPFAuTwRJErToiVYy" ++
             "kQZV5EhQ_AONksuetq-G5hKQJ_C6sbkt9XVL6hdHczmKSB1jn-_T9Ox8e-6ClMY0XRxL9EvSRafn1BaO" ++
             "jiPYmUnvBLi3y0dZsWy5wxA_jLqEh7lww" }] },
-  { comment := "rs512", alg := "RS512",
+  { comment := "rs512", alg := some "RS512",
     key := "{\"alg\":\"RS512\",\"e\":\"AQAB\",\"kid\":\"RS512_2048\",\"kty\":\"RSA\",\"n\":" ++
       "\"wsSoYCNtPJCWoHbWulEH4Pe9geG6kW9zdXJL0rCwtjlWgTcVo0V6sEWLcfs1pFsn-e96w-V53qRd-_" ++
       "0HgZ7WtwIapTNsWEQqrdlsqe6dMkc-nZJ4VitNECWK3mqY-xx8_cOzcW713sWM9zs1nziVmbS1hlqYY1" ++
@@ -1594,7 +1596,7 @@ def groups : List Group := [
             "xdXq9Tq2soiho3kCNt9ouYNONkXFp0YfCF5lRGmfGzPNESLn8EohhBUaiNmfaTDT5QcB_Xwx3im9KAuf" ++
             "CpHoV2lCysQvdTo4et1NQP2YYfqoSi5WMDE3WG4AFynd-8bKZ7IHZ0nkT5DyvwS4r88F4IeIDsNd88W-" ++
             "xhe3nsrANh4DZOpGsuChvtWGSmrwXfauw" }] },
-  { comment := "ps256", alg := "PS256",
+  { comment := "ps256", alg := some "PS256",
     key := "{\"alg\":\"PS256\",\"e\":\"AQAB\",\"kid\":\"PS256_2048\",\"kty\":\"RSA\",\"n\":" ++
       "\"orRRoH0KpfluRVZxUTVQUUqKW0YuvvcXCU-h_ugiJOY3-XRtP3yv0xh42AMltu9aFwD2WQO0aUKeid" ++
       "bqyIRQl7WrOTGJ25JRLtincRoSU_rNIPecFegkfz0-QuRuSMmOJUov6XZTE6A-_48X4aApOXofomqNzi" ++
@@ -1892,7 +1894,7 @@ def groups : List Group := [
             "i6PlqoaCfX2Zk-x0dNYvNE1WFk_vvPeJoLQLx3ws9agFMKV4RilxObN459bkFjHN5Sn6Qu-NkoOQ-Cni" ++
             "tEE3Cpgufqa8Q6c1KgXtrTYG9KKQyXHTaMJki3PrFhrgFRT7x2jG79uSkEyh9aYwb6acLlrYF4cGQ9Yg" ++
             "3vNaOru5-RiFdjqR1UaMo6mQhSl_9ObR2rukRMV0YEuxd73xXgFH5u57oQ1JR_v7SsZosxKf-ao" }] },
-  { comment := "ps384", alg := "PS384",
+  { comment := "ps384", alg := some "PS384",
     key := "{\"alg\":\"PS384\",\"e\":\"AQAB\",\"kid\":\"PS384_2048\",\"kty\":\"RSA\",\"n\":" ++
       "\"zab6XKdr_gSS7Ffgo7__cnLcjR4lrR-zOKoFDwLBBOYxM9a1t8SYXruumsA2pbnAMHTWCuyOJbrzkq" ++
       "DEMP8FuI6UiAXT3XRRHYiFJQp7V0IVraAVxVkHZobiU8zJbAgVsSke54fMM2O0932TDrmY18WCskzqnO" ++
@@ -1932,7 +1934,7 @@ def groups : List Group := [
             "IkL2tfNAJhgy4uSLSq1c9bjla8DycjEJIo1l2lqsvF_gkSUHBqYiyZMnzAz1uNQMFYUR-p2B0tK1J_Pg" ++
             "7Ep7ehBY7uCdJHj6qfxmG6Nr0CddaNWlafdCsvqVJL2sCfBvaHpu5yuM6LkD-cFJZUIOb_PLarpdD3N0" ++
             "FFBOcGqSe8Z8Jwm9N_df-ZLoEMGz3vPC0IxU8LBZPV74EiBH39ba88fQ5jCp1C9ijSo8ig4AGPbuwg" }] },
-  { comment := "ps512", alg := "PS512",
+  { comment := "ps512", alg := some "PS512",
     key := "{\"alg\":\"PS512\",\"e\":\"AQAB\",\"kid\":\"PS512_2048\",\"kty\":\"RSA\",\"n\":" ++
       "\"wsSoYCNtPJCWoHbWulEH4Pe9geG6kW9zdXJL0rCwtjlWgTcVo0V6sEWLcfs1pFsn-e96w-V53qRd-_" ++
       "0HgZ7WtwIapTNsWEQqrdlsqe6dMkc-nZJ4VitNECWK3mqY-xx8_cOzcW713sWM9zs1nziVmbS1hlqYY1" ++
@@ -2046,7 +2048,7 @@ def groups : List Group := [
           "eyJhbGciOiJub25lIiwia2lkIjoibm9uZSJ9.MTIzNDAw." },
       { id := 344, valid := false, jws :=
           "eyJhbGciOiJub25lIiwia2lkIjoiUFM1MTJfMjA0OCJ9.MTIzNDAw." }] },
-  { comment := "rfc7520", alg := "RS256",
+  { comment := "rfc7520", alg := some "RS256",
     key := "{\"alg\":\"RS256\",\"e\":\"AQAB\",\"kid\":\"bilbo.baggins@hobbiton.example\",\"k" ++
       "ty\":\"RSA\",\"n\":\"n4EPtAOCc9AlkeQHPzHStgAbgs7bTZLwUBZdR8_KuKPEHLd4rHVTeT-O-XV" ++
       "2jRojdNhxJWTDvNd7nqQ0VEiZQHz_AJmSCpMaJMRBSFKrKb2wqVwGU_NsYOYL-QtiWN2lbzcEe6XC0dA" ++
@@ -2063,7 +2065,7 @@ def groups : List Group := [
             "B-BDkoBwA78185hX-Es4JIwmDLJK3lfWRa-XtL0RnltuYv746iYTh_qHRD68BNt1uSNCrUCTJDt5aAE6" ++
             "x8wW1Kt9eRo4QPocSadnHXFxnt8Is9UzpERV0ePPQdLuW3IS_de3xyIrDaLGdjluPxUAhb6L2aXic1U1" ++
             "2podGU0KLUQSE_oI-ZnmKJ3F4uOZDnd6QZWJushZ41Axf_fcIe8u9ipH84ogoree7vjbU5y18kDquDg" }] },
-  { comment := "rfc7520", alg := "PS256",
+  { comment := "rfc7520", alg := some "PS256",
     key := "{\"alg\":\"PS256\",\"e\":\"AQAB\",\"kid\":\"bilbo.baggins@hobbiton.example\",\"k" ++
       "ty\":\"RSA\",\"n\":\"n4EPtAOCc9AlkeQHPzHStgAbgs7bTZLwUBZdR8_KuKPEHLd4rHVTeT-O-XV" ++
       "2jRojdNhxJWTDvNd7nqQ0VEiZQHz_AJmSCpMaJMRBSFKrKb2wqVwGU_NsYOYL-QtiWN2lbzcEe6XC0dA" ++
@@ -2072,7 +2074,7 @@ def groups : List Group := [
       "_qixoR7jig3__kRhuaxwUkRz5iaiQkqgc5gHdrNP5zw\",\"use\":\"sig\"}",
     cases := [
 ] },
-  { comment := "rfc7520", alg := "ES521",
+  { comment := "rfc7520", alg := some "ES521",
     key := "{\"alg\":\"ES521\",\"crv\":\"P-521\",\"kid\":\"bilbo.baggins@hobbiton.example\"," ++
       "\"kty\":\"EC\",\"use\":\"sig\",\"x\":\"AHKZLLOsCOzz5cY97ewNUajB957y-C-U88c3v13nm" ++
       "GZx6sYl_oJXu9A5RkTKqjqvjyekWF-7ytDyRXYgCF5cj0Kt\",\"y\":\"AdymlHvOiLxXkEhayXQnNC" ++
@@ -2085,7 +2087,7 @@ def groups : List Group := [
             "vIGtub3dpbmcgd2hlcmUgeW91IG1pZ2h0IGJlIHN3ZXB0IG9mZiB0by4.AE_R_YZCChjn4791jSQCrdP" ++
             "ZCNYqHXCTZH0-JZGYNlaAjP2kqaluUIIUnC9qvbu9Plon7KRTzoNEuT4Va2cmL1eJAQy3mtPBu_u_sDD" ++
             "yYjnAMDxXPn7XrT0lw-kvAD890jl8e2puQens_IEKBpHABlsbEPX6sFY8OcGDqoRuBomu9xQ2" }] },
-  { comment := "rfc7520", alg := "HS256",
+  { comment := "rfc7520", alg := some "HS256",
     key := "{\"alg\":\"HS256\",\"k\":\"hJtXIZ2uSN5kbQfbtTNWbpdmhkV8FJG-Onbc6mxCcYg\",\"kid\"" ++
       ":\"018c0ae5-4d9b-471b-bfd6-eef314bc7037\",\"kty\":\"oct\",\"use\":\"sig\"}",
     cases := [
@@ -2095,7 +2097,7 @@ def groups : List Group := [
             "1IHN0ZXAgb250byB0aGUgcm9hZCwgYW5kIGlmIHlvdSBkb24ndCBrZWVwIHlvdXIgZmVldCwgdGhlcmX" ++
             "igJlzIG5vIGtub3dpbmcgd2hlcmUgeW91IG1pZ2h0IGJlIHN3ZXB0IG9mZiB0by4.s0h6KThzkfBBBkL" ++
             "spW1h84VsJZFTsPPqMDA7g1Md7p0" }] },
-  { comment := "rfc7520WithKeyOps", alg := "RS256",
+  { comment := "rfc7520WithKeyOps", alg := some "RS256",
     key := "{\"alg\":\"RS256\",\"e\":\"AQAB\",\"key_ops\":[\"verify\"],\"kid\":\"bilbo.baggi" ++
       "ns@hobbiton.example\",\"kty\":\"RSA\",\"n\":\"n4EPtAOCc9AlkeQHPzHStgAbgs7bTZLwUB" ++
       "ZdR8_KuKPEHLd4rHVTeT-O-XV2jRojdNhxJWTDvNd7nqQ0VEiZQHz_AJmSCpMaJMRBSFKrKb2wqVwGU_" ++
@@ -2112,7 +2114,7 @@ def groups : List Group := [
             "B-BDkoBwA78185hX-Es4JIwmDLJK3lfWRa-XtL0RnltuYv746iYTh_qHRD68BNt1uSNCrUCTJDt5aAE6" ++
             "x8wW1Kt9eRo4QPocSadnHXFxnt8Is9UzpERV0ePPQdLuW3IS_de3xyIrDaLGdjluPxUAhb6L2aXic1U1" ++
             "2podGU0KLUQSE_oI-ZnmKJ3F4uOZDnd6QZWJushZ41Axf_fcIe8u9ipH84ogoree7vjbU5y18kDquDg" }] },
-  { comment := "rfc7520WithKeyOps", alg := "PS256",
+  { comment := "rfc7520WithKeyOps", alg := some "PS256",
     key := "{\"alg\":\"PS256\",\"e\":\"AQAB\",\"key_ops\":[\"verify\"],\"kid\":\"bilbo.baggi" ++
       "ns@hobbiton.example\",\"kty\":\"RSA\",\"n\":\"n4EPtAOCc9AlkeQHPzHStgAbgs7bTZLwUB" ++
       "ZdR8_KuKPEHLd4rHVTeT-O-XV2jRojdNhxJWTDvNd7nqQ0VEiZQHz_AJmSCpMaJMRBSFKrKb2wqVwGU_" ++
@@ -2121,7 +2123,7 @@ def groups : List Group := [
       "KwuCLqKnS2BYwdq_mzSnbLY7h_qixoR7jig3__kRhuaxwUkRz5iaiQkqgc5gHdrNP5zw\"}",
     cases := [
 ] },
-  { comment := "rfc7520WithKeyOps", alg := "ES521",
+  { comment := "rfc7520WithKeyOps", alg := some "ES521",
     key := "{\"alg\":\"ES521\",\"crv\":\"P-521\",\"key_ops\":[\"verify\"],\"kid\":\"bilbo.ba" ++
       "ggins@hobbiton.example\",\"kty\":\"EC\",\"x\":\"AHKZLLOsCOzz5cY97ewNUajB957y-C-U" ++
       "88c3v13nmGZx6sYl_oJXu9A5RkTKqjqvjyekWF-7ytDyRXYgCF5cj0Kt\",\"y\":\"AdymlHvOiLxXk" ++
@@ -2134,7 +2136,7 @@ def groups : List Group := [
             "vIGtub3dpbmcgd2hlcmUgeW91IG1pZ2h0IGJlIHN3ZXB0IG9mZiB0by4.AE_R_YZCChjn4791jSQCrdP" ++
             "ZCNYqHXCTZH0-JZGYNlaAjP2kqaluUIIUnC9qvbu9Plon7KRTzoNEuT4Va2cmL1eJAQy3mtPBu_u_sDD" ++
             "yYjnAMDxXPn7XrT0lw-kvAD890jl8e2puQens_IEKBpHABlsbEPX6sFY8OcGDqoRuBomu9xQ2" }] },
-  { comment := "rfc7520", alg := "HS256",
+  { comment := "rfc7520", alg := some "HS256",
     key := "{\"alg\":\"HS256\",\"k\":\"hJtXIZ2uSN5kbQfbtTNWbpdmhkV8FJG-Onbc6mxCcYg\",\"kid\"" ++
       ":\"018c0ae5-4d9b-471b-bfd6-eef314bc7037\",\"kty\":\"oct\",\"use\":\"sig\"}",
     cases := [
@@ -2144,7 +2146,7 @@ def groups : List Group := [
             "1IHN0ZXAgb250byB0aGUgcm9hZCwgYW5kIGlmIHlvdSBkb24ndCBrZWVwIHlvdXIgZmVldCwgdGhlcmX" ++
             "igJlzIG5vIGtub3dpbmcgd2hlcmUgeW91IG1pZ2h0IGJlIHN3ZXB0IG9mZiB0by4.s0h6KThzkfBBBkL" ++
             "spW1h84VsJZFTsPPqMDA7g1Md7p0" }] },
-  { comment := "rsa_encryption", alg := "?",
+  { comment := "rsa_encryption", alg := none,
     key := "{\"e\":\"AQAB\",\"kid\":\"kid-rsa-sign\",\"kty\":\"RSA\",\"n\":\"kqGboBfAWttWPCA" ++
       "-0cGRgsY6SaYoIARt0B_PkaEcIq9HPYNdu9n6UuWHuuTHrjF_ZoQW97r5HaAorNvrMEGTGdxCHZdEtkH" ++
       "vNVVmrtxTBLiQCbCozXhFoIrVcr3qUBrdGnNn_M3jJi7Wg7p_-x62nS5gNG875oyheRkutHsQXikFZws" ++
@@ -2158,7 +2160,7 @@ def groups : List Group := [
             "lqMrd_ifhi9GCsMlyi8dpQ42Ou1etZljFZuWjfyk8CN1c5DaHRwhqjScAPIFp6xmzKIRUJ_xdQfUSfSl" ++
             "ujLaixtScU518EoNP4oo1v7E8RAz6ZO4g2N4Xqs8OvSxYydcoTEg42QnLHe9JnXgI37Q5gSwinwaPsG3" ++
             "Ry56UYiLoL8mCUa74S51y02VsIgVmmGWgaXjM-i_lCiKQDBiBnvWlka4XhVuvd6ZWibM9cbCPtPg" }] },
-  { comment := "ec_key_for_encryption", alg := "?",
+  { comment := "ec_key_for_encryption", alg := none,
     key := "{\"crv\":\"P-256\",\"kid\":\"kid-ec-sign\",\"kty\":\"EC\",\"use\":\"enc\",\"x\":" ++
       "\"04N0xi21hshyvBp7I167sbE_bXqyqkAPfefdklMO7wY\",\"y\":\"UI8exy-C06a7DUnjIdENkxeF" ++
       "tHM4-l_41LqEw9nVgmw\"}",
@@ -2166,7 +2168,7 @@ def groups : List Group := [
       { id := 354, valid := false, jws :=
           "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v.5cA0OHyMP7ezamUd5c9kV-FrGxd" ++
             "x4hbGXOdplQkutrqWrte5P-pAvsE3Ve6xSyU3YDQwUHjVVOtvcrEbbnZ8yA" }] },
-  { comment := "rsa_encryption", alg := "?",
+  { comment := "rsa_encryption", alg := none,
     key := "{\"e\":\"AQAB\",\"key_ops\":[\"encrypt\"],\"kid\":\"kid-rsa-sign\",\"kty\":\"RSA" ++
       "\",\"n\":\"kqGboBfAWttWPCA-0cGRgsY6SaYoIARt0B_PkaEcIq9HPYNdu9n6UuWHuuTHrjF_ZoQW9" ++
       "7r5HaAorNvrMEGTGdxCHZdEtkHvNVVmrtxTBLiQCbCozXhFoIrVcr3qUBrdGnNn_M3jJi7Wg7p_-x62n" ++
@@ -2180,7 +2182,7 @@ def groups : List Group := [
             "lqMrd_ifhi9GCsMlyi8dpQ42Ou1etZljFZuWjfyk8CN1c5DaHRwhqjScAPIFp6xmzKIRUJ_xdQfUSfSl" ++
             "ujLaixtScU518EoNP4oo1v7E8RAz6ZO4g2N4Xqs8OvSxYydcoTEg42QnLHe9JnXgI37Q5gSwinwaPsG3" ++
             "Ry56UYiLoL8mCUa74S51y02VsIgVmmGWgaXjM-i_lCiKQDBiBnvWlka4XhVuvd6ZWibM9cbCPtPg" }] },
-  { comment := "ec_key_for_encryption", alg := "?",
+  { comment := "ec_key_for_encryption", alg := none,
     key := "{\"crv\":\"P-256\",\"key_ops\":[\"encrypt\"],\"kid\":\"kid-ec-sign\",\"kty\":\"E" ++
       "C\",\"x\":\"04N0xi21hshyvBp7I167sbE_bXqyqkAPfefdklMO7wY\",\"y\":\"UI8exy-C06a7DU" ++
       "njIdENkxeFtHM4-l_41LqEw9nVgmw\"}",
@@ -2188,7 +2190,7 @@ def groups : List Group := [
       { id := 356, valid := false, jws :=
           "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtpZC1lYy1zaWduIn0.Zm9v.5cA0OHyMP7ezamUd5c9kV-FrGxd" ++
             "x4hbGXOdplQkutrqWrte5P-pAvsE3Ve6xSyU3YDQwUHjVVOtvcrEbbnZ8yA" }] },
-  { comment := "base64", alg := "HS256",
+  { comment := "base64", alg := some "HS256",
     key := "{\"alg\":\"HS256\",\"k\":\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\"kid\"" ++
       ":\"hs256-key\",\"kty\":\"oct\",\"use\":\"sig\"}",
     cases := [
@@ -2243,7 +2245,7 @@ def groups : List Group := [
       { id := 377, valid := true, jws :=
           "eyJraWQiOiJoczI1Ni1rZXkiLAoJImFsZyI6IkhTMjU2In0.VGVzdA.Yxn8cTl7IHpFIoEPOFrWmjm-G" ++
             "Qlr_RMqHNJOp1ZuweY" }] },
-  { comment := "SpecialCaseEs256", alg := "ES256",
+  { comment := "SpecialCaseEs256", alg := some "ES256",
     key := "{\"alg\":\"ES256\",\"crv\":\"P-256\",\"kid\":\"kid-ec-sign\",\"kty\":\"EC\",\"us" ++
       "e\":\"sig\",\"x\":\"04N0xi21hshyvBp7I167sbE_bXqyqkAPfefdklMO7wY\",\"y\":\"UI8exy" ++
       "-C06a7DUnjIdENkxeFtHM4-l_41LqEw9nVgmw\"}",
