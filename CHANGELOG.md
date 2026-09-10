@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1
+
+- Updated to `leancrypto` 0.4.1.
+
 ## 0.1.0
 
 - The pure core: compact serialization, the ECDSA signature conversions, and JSON read by `lean-json` behind a length and a nesting limit.

@@ -5,12 +5,12 @@ Released under Apache 2.0 license as described in the file LICENSE.
 import Lake
 open Lake DSL
 
-require leancrypto from git "https://github.com/paulbutcher/leancrypto" @ "v0.4.0"
+require leancrypto from git "https://github.com/paulbutcher/leancrypto" @ "v0.4.1"
 
 require json from git "https://github.com/paulbutcher/lean-json" @ "v0.3.0"
 
 package jose where
-  version := v!"0.1.0"
+  version := v!"0.1.1"
   leanOptions := #[
     ⟨`autoImplicit, false⟩,
     ⟨`relaxedAutoImplicit, false⟩,
