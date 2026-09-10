@@ -93,12 +93,6 @@ Checked over drawn values, not proved:
 
 - An ECDSA signature written as `R‖S` reads back as itself through DER at all three curves, over coordinates nobody here chose. This is the half of that round trip the proof does not close, and the obstacle is recorded where the property is.
 
-Not established either way:
-
-- That `ES*` or `EdDSA` verification is correct. Neither is implemented here, so nothing tests them, and a token naming one is refused for its algorithm rather than checked.
-- That comparing a tag takes the same time whether it matches or not. The comparison is leancrypto's, written to avoid an early exit, but that is a claim about how it executes and not about the value it returns.
-- That the JSON parser is correct, which nothing here establishes. It is [lean-json](https://github.com/paulbutcher/lean-json), whose reading is proved against the grammar of RFC 8259 and whose traversals are proved to keep their work on the heap rather than the stack; this package rests on those theorems and repeats none of them. What it does establish is that a limit reaches the parser, and that each way the parser refuses arrives as an error naming the part the text came from.
-
 ## Building
 
 `lake build` builds the library; `lake test` runs the suite, which lives in a subproject of its own so that nothing it needs reaches a downstream consumer. The properties above are run with [Plausible](https://github.com/leanprover-community/plausible), which that subproject requires and a consumer of this library does not.
