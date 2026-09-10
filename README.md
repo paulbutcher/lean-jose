@@ -12,6 +12,8 @@ Given a string somebody handed you, it returns either a set of verified claims o
 | `ES256` `ES384` `ES512` | no | no |
 | `EdDSA` | no | no |
 
+A client that needs something this table does not offer can use [`jose-libcrypto`](https://github.com/paulbutcher/jose-libcrypto), which supplies the same interface over libcrypto.
+
 **The algorithm never comes from the token.** A `Policy` names the algorithms you accept. The token's `alg` is compared against that list and refused if it is absent from it.
 
 ## Usage
@@ -92,6 +94,8 @@ Checked against constructed inputs:
 Checked over drawn values, not proved:
 
 - An ECDSA signature written as `R‖S` reads back as itself through DER at all three curves, over coordinates nobody here chose. This is the half of that round trip the proof does not close, and the obstacle is recorded where the property is.
+
+The cases above are also run against [`jose-libcrypto`](https://github.com/paulbutcher/jose-libcrypto), so this backend is cross-checked against the implementations in libcrypto.
 
 ## Building
 
