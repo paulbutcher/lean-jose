@@ -1,6 +1,0 @@
-name = "jose"
-version = "0.1.0"
-defaultTargets = ["Jose"]
-
-[[lean_lib]]
-name = "Jose"
