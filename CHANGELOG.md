@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.2
+
+- Chore: bump dependencies.
+
 ## 0.2.1
 
 - The Wycheproof vectors carry a key's `alg` as an `Option`, so the four groups whose key declares none are run again rather than skipped.
