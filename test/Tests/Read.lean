@@ -32,7 +32,7 @@ private theorem foldl_keeps (k : String) (acc : Option Value) :
   | [], _ => rfl
   | member :: rest, h => by
     have hb : (member.1 == k) = false := beq_eq_false_iff_ne.mpr (h member (by simp))
-    simp only [List.foldl_cons, hb, Bool.false_eq_true, if_false]
+    simp only [List.foldl_cons, hb, Bool.false_eq_true, ite_false]
     exact foldl_keeps k acc rest fun other hother => h other (by simp [hother])
 
 /--
@@ -58,10 +58,10 @@ private theorem find?_eq_foldl (k : String) :
       have hrest : ∀ other ∈ rest, other.1 ≠ k := by
         intro other hother hname
         exact h.1 (List.mem_map.mpr ⟨other, hother, by rw [hname, hmember]⟩)
-      simp only [List.find?_cons, List.foldl_cons, hb, if_true]
+      simp only [List.find?_cons, List.foldl_cons, hb, ite_true]
       exact (foldl_keeps k (some member.2) rest hrest).symm
     | false =>
-      simp only [List.find?_cons, List.foldl_cons, hb, Bool.false_eq_true, if_false]
+      simp only [List.find?_cons, List.foldl_cons, hb, Bool.false_eq_true, ite_false]
       exact find?_eq_foldl k rest h.2
 
 /--
