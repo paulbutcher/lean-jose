@@ -5,7 +5,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 import Lake
 open Lake DSL
 
-require leancrypto from git "https://github.com/paulbutcher/leancrypto" @ "v0.4.2"
+require leancrypto from git "https://github.com/paulbutcher/leancrypto" @ "v0.5.0"
 
 require json from git "https://github.com/paulbutcher/lean-json" @ "v0.4.0"
 
