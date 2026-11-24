@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.0
+
+- Breaking: requires Lean `v4.36.0`; move to the same toolchain.
+- Updated to `json` 0.4.0.
+
 ## 0.2.2
 
 - Chore: bump dependencies.

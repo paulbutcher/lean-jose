@@ -7,10 +7,10 @@ open Lake DSL
 
 require leancrypto from git "https://github.com/paulbutcher/leancrypto" @ "v0.4.2"
 
-require json from git "https://github.com/paulbutcher/lean-json" @ "v0.3.1"
+require json from git "https://github.com/paulbutcher/lean-json" @ "v0.4.0"
 
 package jose where
-  version := v!"0.2.2"
+  version := v!"0.3.0"
   leanOptions := #[
     ⟨`autoImplicit, false⟩,
     ⟨`relaxedAutoImplicit, false⟩,
