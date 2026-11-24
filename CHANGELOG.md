@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.1
+
+- Updated to `leancrypto` 0.5.0.
+
 ## 0.3.0
 
 - Breaking: requires Lean `v4.36.0`; move to the same toolchain.
